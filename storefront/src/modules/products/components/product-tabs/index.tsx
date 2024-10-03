@@ -1,24 +1,24 @@
 "use client"
+import { Button, Text } from "@medusajs/ui";
+import { PricedProduct } from "@medusajs/medusa/dist/types/pricing"
 
-import Back from "@modules/common/icons/back"
-import FastDelivery from "@modules/common/icons/fast-delivery"
+import { RocketLaunch,Puzzle,EllipseGreenSolid } from "@medusajs/icons"
 import Refresh from "@modules/common/icons/refresh"
 
 import Accordion from "./accordion"
-import { HttpTypes } from "@medusajs/types"
 
 type ProductTabsProps = {
-  product: HttpTypes.StoreProduct
+  product: PricedProduct
 }
 
 const ProductTabs = ({ product }: ProductTabsProps) => {
   const tabs = [
     {
-      label: "Product Information",
+      label: "Información del servicio",
       component: <ProductInfoTab product={product} />,
     },
     {
-      label: "Shipping & Returns",
+      label: "Beneficios",
       component: <ShippingInfoTab />,
     },
   ]
@@ -47,33 +47,47 @@ const ProductInfoTab = ({ product }: ProductTabsProps) => {
       <div className="grid grid-cols-2 gap-x-8">
         <div className="flex flex-col gap-y-4">
           <div>
-            <span className="font-semibold">Material</span>
+            <span className="font-semibold">Paquete</span>
             <p>{product.material ? product.material : "-"}</p>
           </div>
           <div>
-            <span className="font-semibold">Country of origin</span>
+            <span className="font-semibold">Desarrollado en</span>
             <p>{product.origin_country ? product.origin_country : "-"}</p>
           </div>
           <div>
-            <span className="font-semibold">Type</span>
+            <span className="font-semibold">Tipo</span>
             <p>{product.type ? product.type.value : "-"}</p>
           </div>
         </div>
         <div className="flex flex-col gap-y-4">
           <div>
-            <span className="font-semibold">Weight</span>
-            <p>{product.weight ? `${product.weight} g` : "-"}</p>
+            <span className="font-semibold">Hosting</span>
+            <p>{product.weight ? `${product.weight} Año` : "-"}</p>
           </div>
           <div>
-            <span className="font-semibold">Dimensions</span>
+            <span className="font-semibold">Secciones</span>
             <p>
-              {product.length && product.width && product.height
-                ? `${product.length}L x ${product.width}W x ${product.height}H`
-                : "-"}
+            {product.height ? `${product.height} +` : "-"}
             </p>
           </div>
         </div>
       </div>
+      {product.tags?.length ? (
+  <div>
+    <span className="font-semibold">Tags</span>
+    <div className="flex flex-wrap gap-2 mt-2">
+      {product.tags.map((tag, index) => (
+        <button
+        
+          key={index}
+          className="bg-gray-100 text-gray-800 hover:bg-gray-200 text-sm font-medium px-4 py-2 rounded-full focus:none"
+        >
+          {tag.value}
+        </button>
+      ))}
+    </div>
+  </div>
+) : null}
     </div>
   )
 }
@@ -83,33 +97,29 @@ const ShippingInfoTab = () => {
     <div className="text-small-regular py-8">
       <div className="grid grid-cols-1 gap-y-8">
         <div className="flex items-start gap-x-2">
-          <FastDelivery />
+          <RocketLaunch />
           <div>
-            <span className="font-semibold">Fast delivery</span>
+            <span className="font-semibold">Implementación inmediata</span>
             <p className="max-w-sm">
-              Your package will arrive in 3-5 business days at your pick up
-              location or in the comfort of your home.
+              Tu sitio web quedará implementado de 5 a 10 días hábiles, además podrás realizar 5 cambios dentro del periodo de desarrollo
             </p>
           </div>
         </div>
         <div className="flex items-start gap-x-2">
-          <Refresh />
+          <Puzzle />
           <div>
-            <span className="font-semibold">Simple exchanges</span>
+            <span className="font-semibold">Turbo Addons</span>
             <p className="max-w-sm">
-              Is the fit not quite right? No worries - we&apos;ll exchange your
-              product for a new one.
+              Agrega cualquier funcionalidad a tu sitio web, ¡tranquilo! no tienes que hacerlo ahora.
             </p>
           </div>
         </div>
         <div className="flex items-start gap-x-2">
-          <Back />
+          <EllipseGreenSolid />
           <div>
-            <span className="font-semibold">Easy returns</span>
+            <span className="font-semibold">Pago seguro</span>
             <p className="max-w-sm">
-              Just return your product and we&apos;ll refund your money. No
-              questions asked – we&apos;ll do our best to make sure your return
-              is hassle-free.
+              Descuida, nuestro pagos están protegidos y encriptados, tu dinero siempre estará seguro hasta que finalice tu desarrollo.
             </p>
           </div>
         </div>

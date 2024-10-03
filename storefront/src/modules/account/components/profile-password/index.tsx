@@ -1,25 +1,25 @@
 "use client"
 
+import { Customer } from "@medusajs/medusa"
 import React, { useEffect } from "react"
 
 import Input from "@modules/common/components/input"
 
 import AccountInfo from "../account-info"
+import { updateCustomerPassword } from "@modules/account/actions"
 import { useFormState } from "react-dom"
-import { HttpTypes } from "@medusajs/types"
 
 type MyInformationProps = {
-  customer: HttpTypes.StoreCustomer
+  customer: Omit<Customer, "password_hash">
 }
 
 const ProfileName: React.FC<MyInformationProps> = ({ customer }) => {
   const [successState, setSuccessState] = React.useState(false)
 
-  // TODO: Add support for password updates
-  const [state, formAction] = useFormState((() => {}) as any, {
+  const [state, formAction] = useFormState(updateCustomerPassword, {
     customer,
     success: false,
-    error: null,
+    error: false,
   })
 
   const clearState = () => {
@@ -35,31 +35,31 @@ const ProfileName: React.FC<MyInformationProps> = ({ customer }) => {
       <AccountInfo
         label="Password"
         currentInfo={
-          <span>The password is not shown for security reasons</span>
+          <span>La contraseña no se muestra por seguridad</span>
         }
         isSuccess={successState}
         isError={!!state.error}
-        errorMessage={state.error ?? undefined}
+        errorMessage={state.error}
         clearState={clearState}
         data-testid="account-password-editor"
       >
         <div className="grid grid-cols-2 gap-4">
           <Input
-            label="Old password"
+            label="Contraseña anterior"
             name="old_password"
             required
-            type="password"
+            type="Contraseña"
             data-testid="old-password-input"
           />
           <Input
-            label="New password"
+            label="Nueva contraseña"
             type="password"
             name="new_password"
             required
             data-testid="new-password-input"
           />
           <Input
-            label="Confirm password"
+            label="Confirmar contraseña"
             type="password"
             name="confirm_password"
             required

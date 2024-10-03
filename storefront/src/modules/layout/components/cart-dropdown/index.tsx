@@ -1,12 +1,14 @@
 "use client"
 
 import { Popover, Transition } from "@headlessui/react"
+import { ShoppingCart } from "@medusajs/icons"
+
+import { Cart } from "@medusajs/medusa"
 import { Button } from "@medusajs/ui"
-import { usePathname } from "next/navigation"
+import { useParams, usePathname } from "next/navigation"
 import { Fragment, useEffect, useRef, useState } from "react"
 
-import { convertToLocale } from "@lib/util/money"
-import { HttpTypes } from "@medusajs/types"
+import { formatAmount } from "@lib/util/prices"
 import DeleteButton from "@modules/common/components/delete-button"
 import LineItemOptions from "@modules/common/components/line-item-options"
 import LineItemPrice from "@modules/common/components/line-item-price"
@@ -16,12 +18,14 @@ import Thumbnail from "@modules/products/components/thumbnail"
 const CartDropdown = ({
   cart: cartState,
 }: {
-  cart?: HttpTypes.StoreCart | null
+  cart?: Omit<Cart, "beforeInsert" | "afterLoad"> | null
 }) => {
   const [activeTimer, setActiveTimer] = useState<NodeJS.Timer | undefined>(
     undefined
   )
   const [cartDropdownOpen, setCartDropdownOpen] = useState(false)
+
+  const { countryCode } = useParams()
 
   const open = () => setCartDropdownOpen(true)
   const close = () => setCartDropdownOpen(false)
@@ -31,7 +35,6 @@ const CartDropdown = ({
       return acc + item.quantity
     }, 0) || 0
 
-  const subtotal = cartState?.subtotal ?? 0
   const itemRef = useRef<number>(totalItems || 0)
 
   const timedOpen = () => {
@@ -78,10 +81,14 @@ const CartDropdown = ({
       <Popover className="relative h-full">
         <Popover.Button className="h-full">
           <LocalizedClientLink
-            className="hover:text-ui-fg-base"
+            className="hover:text-ui-fg-base flex gap-x-1"
             href="/cart"
             data-testid="nav-cart-link"
-          >{`Cart (${totalItems})`}</LocalizedClientLink>
+          >
+
+           <ShoppingCart className="text-black"/>
+
+            {`(${totalItems})`}</LocalizedClientLink>
         </Popover.Button>
         <Transition
           show={cartDropdownOpen}
@@ -99,16 +106,14 @@ const CartDropdown = ({
             data-testid="nav-cart-dropdown"
           >
             <div className="p-4 flex items-center justify-center">
-              <h3 className="text-large-semi">Cart</h3>
+              <h3 className="text-large-semi">Carrito</h3>
             </div>
             {cartState && cartState.items?.length ? (
               <>
                 <div className="overflow-y-scroll max-h-[402px] px-4 grid grid-cols-1 gap-y-8 no-scrollbar p-px">
                   {cartState.items
                     .sort((a, b) => {
-                      return (a.created_at ?? "") > (b.created_at ?? "")
-                        ? -1
-                        : 1
+                      return a.created_at > b.created_at ? -1 : 1
                     })
                     .map((item) => (
                       <div
@@ -117,14 +122,10 @@ const CartDropdown = ({
                         data-testid="cart-item"
                       >
                         <LocalizedClientLink
-                          href={`/products/${item.variant?.product?.handle}`}
+                          href={`/products/${item.variant.product.handle}`}
                           className="w-24"
                         >
-                          <Thumbnail
-                            thumbnail={item.variant?.product?.thumbnail}
-                            images={item.variant?.product?.images}
-                            size="square"
-                          />
+                          <Thumbnail thumbnail={item.thumbnail} size="square" />
                         </LocalizedClientLink>
                         <div className="flex flex-col justify-between flex-1">
                           <div className="flex flex-col flex-1">
@@ -132,7 +133,7 @@ const CartDropdown = ({
                               <div className="flex flex-col overflow-ellipsis whitespace-nowrap mr-4 w-[180px]">
                                 <h3 className="text-base-regular overflow-hidden text-ellipsis">
                                   <LocalizedClientLink
-                                    href={`/products/${item.variant?.product?.handle}`}
+                                    href={`/products/${item.variant.product.handle}`}
                                     data-testid="product-link"
                                   >
                                     {item.title}
@@ -147,11 +148,15 @@ const CartDropdown = ({
                                   data-testid="cart-item-quantity"
                                   data-value={item.quantity}
                                 >
-                                  Quantity: {item.quantity}
+                                  Cantidad: {item.quantity}
                                 </span>
                               </div>
                               <div className="flex justify-end">
-                                <LineItemPrice item={item} style="tight" />
+                                <LineItemPrice
+                                  region={cartState.region}
+                                  item={item}
+                                  style="tight"
+                                />
                               </div>
                             </div>
                           </div>
@@ -160,7 +165,7 @@ const CartDropdown = ({
                             className="mt-1"
                             data-testid="cart-item-remove-button"
                           >
-                            Remove
+                            Remover
                           </DeleteButton>
                         </div>
                       </div>
@@ -175,11 +180,12 @@ const CartDropdown = ({
                     <span
                       className="text-large-semi"
                       data-testid="cart-subtotal"
-                      data-value={subtotal}
+                      data-value={cartState.subtotal || 0}
                     >
-                      {convertToLocale({
-                        amount: subtotal,
-                        currency_code: cartState.currency_code,
+                      {formatAmount({
+                        amount: cartState.subtotal || 0,
+                        region: cartState.region,
+                        includeTaxes: false,
                       })}
                     </span>
                   </div>
@@ -189,7 +195,7 @@ const CartDropdown = ({
                       size="large"
                       data-testid="go-to-cart-button"
                     >
-                      Go to cart
+                      Ir al carrito
                     </Button>
                   </LocalizedClientLink>
                 </div>
@@ -200,12 +206,12 @@ const CartDropdown = ({
                   <div className="bg-gray-900 text-small-regular flex items-center justify-center w-6 h-6 rounded-full text-white">
                     <span>0</span>
                   </div>
-                  <span>Your shopping bag is empty.</span>
+                  <span>Tu carrito está vacío.</span>
                   <div>
                     <LocalizedClientLink href="/store">
                       <>
-                        <span className="sr-only">Go to all products page</span>
-                        <Button onClick={close}>Explore products</Button>
+                        <span className="sr-only">Ver todos los productos</span>
+                        <Button onClick={close}>Explorar productos</Button>
                       </>
                     </LocalizedClientLink>
                   </div>

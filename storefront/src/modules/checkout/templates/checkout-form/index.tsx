@@ -1,28 +1,45 @@
-import { listCartShippingMethods } from "@lib/data/fulfillment"
-import { listCartPaymentMethods } from "@lib/data/payment"
-import { HttpTypes } from "@medusajs/types"
+import {
+  createPaymentSessions,
+  getCustomer,
+  listCartShippingMethods,
+} from "@lib/data"
+import { getCheckoutStep } from "@lib/util/get-checkout-step"
 import Addresses from "@modules/checkout/components/addresses"
 import Payment from "@modules/checkout/components/payment"
 import Review from "@modules/checkout/components/review"
 import Shipping from "@modules/checkout/components/shipping"
+import { cookies } from "next/headers"
+import { CartWithCheckoutStep } from "types/global"
 
-export default async function CheckoutForm({
-  cart,
-  customer,
-}: {
-  cart: HttpTypes.StoreCart | null
-  customer: HttpTypes.StoreCustomer | null
-}) {
+export default async function CheckoutForm() {
+  const cartId = cookies().get("_medusa_cart_id")?.value
+
+  if (!cartId) {
+    return null
+  }
+
+  // create payment sessions and get cart
+  const cart = (await createPaymentSessions(cartId).then(
+    (cart) => cart
+  )) as CartWithCheckoutStep
+
   if (!cart) {
     return null
   }
 
-  const shippingMethods = await listCartShippingMethods(cart.id)
-  const paymentMethods = await listCartPaymentMethods(cart.region?.id ?? "")
+  cart.checkout_step = cart && getCheckoutStep(cart)
 
-  if (!shippingMethods || !paymentMethods) {
+  // get available shipping methods
+  const availableShippingMethods = await listCartShippingMethods(cart.id).then(
+    (methods) => methods?.filter((m) => !m.is_return)
+  )
+
+  if (!availableShippingMethods) {
     return null
   }
+
+  // get customer if logged in
+  const customer = await getCustomer()
 
   return (
     <div>
@@ -32,11 +49,14 @@ export default async function CheckoutForm({
         </div>
 
         <div>
-          <Shipping cart={cart} availableShippingMethods={shippingMethods} />
+          <Shipping
+            cart={cart}
+            availableShippingMethods={availableShippingMethods}
+          />
         </div>
 
         <div>
-          <Payment cart={cart} availablePaymentMethods={paymentMethods} />
+          <Payment cart={cart} />
         </div>
 
         <div>

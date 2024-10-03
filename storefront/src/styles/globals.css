@@ -110,3 +110,192 @@
     @apply text-[32px] leading-[44px] font-semibold;
   }
 }
+
+
+
+/* .imageWithClip {
+  clip-path: polygon(0 17%, 100% 6%, 100% 84%, 0% 100%);
+
+} */
+
+.kenBurnsEffect {
+  animation: kenBurns 10s infinite alternate;
+}
+
+@keyframes kenBurns {
+  0% {
+    transform: scale(1.1) translate(-20px, 0);
+  }
+  100% {
+    transform: scale(1.2) translate(20px, 0);
+  }
+}
+
+@media (max-width: 1024px) {
+  .kenBurnsEffect {
+    animation: kenBurnsMobile 10s infinite alternate;
+  }
+
+  @keyframes kenBurnsMobile {
+    0% {
+      transform: scale(1.05) translate(-10px, 0);
+    }
+    100% {
+      transform: scale(1.1) translate(10px, 0);
+    }
+  }
+}
+
+.textOverlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.swiperSlide {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+
+/* CSS Slider Hero */
+
+
+/* Contenedor del slider */
+.slider {
+  position: relative;
+  width: 100%;
+  height: 600px;
+  overflow: hidden;
+}
+
+/* Wrapper para las diapositivas */
+.slider-wrapper {
+  display: flex;
+  width: 200%; /* Dos slides, por eso 200% */
+  height: 100%;
+  animation: slide 10s infinite; /* Animación continua */
+}
+
+/* Cada slide */
+.slide {
+  width: 100%;
+  flex-shrink: 0;
+  position: relative;
+  height: 100%;
+}
+
+/* Animación del slider */
+@keyframes slide {
+  0% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+/* Animación blinked Dot */
+
+/* @keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+.blink {
+  animation: blink 2s infinite;
+} */
+
+
+/* MARQUEE */
+
+
+/* === Marquee === */
+
+/* === Marquee === */
+.marqueeContainer {
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  box-sizing: border-box;
+  padding: 2px 0;
+  display: flex;
+  align-items: center;
+}
+
+.marquee {
+  display: inline-block;
+  white-space: nowrap;
+  will-change: transform; /* Optimización del renderizado para animaciones */
+}
+
+.textItem {
+  margin: 0 30px;
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 0.15em;
+}
+
+.icon {
+  margin: 0 20px;
+  font-size: 24px;
+}
+
+
+.globe-container {
+  width: 100%; max-width: 600px; aspect-ratio: 1 / 1; margin: auto; position: relative;
+}
+
+.canvas-globe{
+
+  width: 100%; height: 100%; cursor: grab; contain: size layout paint; opacity: 1; transition: opacity 1s; border-radius: 50%;
+}
+
+
+
+  @keyframes gradient-move {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  .gradient-text {
+    background: linear-gradient(90deg, #01adfd, #047ac9, #0c5697,#0095da, #047ac9, #1a2936);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradient-move 10s ease-in-out infinite;
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+  }
+
+
+  
+  .gradient-text-2 {
+    background: linear-gradient(90deg, #fc0047, #fac540,#fc0047);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradient-move 9s ease-in-out infinite;
+    text-align: center;
+  }
+
+
+

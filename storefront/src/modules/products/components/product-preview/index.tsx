@@ -1,25 +1,27 @@
 import { Text } from "@medusajs/ui"
 
+import { ProductPreviewType } from "types/global"
+
+import { retrievePricedProductById } from "@lib/data"
 import { getProductPrice } from "@lib/util/get-product-price"
+import { Region } from "@medusajs/medusa"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Thumbnail from "../thumbnail"
 import PreviewPrice from "./price"
-import { getProductsById } from "@lib/data/products"
-import { HttpTypes } from "@medusajs/types"
 
 export default async function ProductPreview({
-  product,
+  productPreview,
   isFeatured,
   region,
 }: {
-  product: HttpTypes.StoreProduct
+  productPreview: ProductPreviewType
   isFeatured?: boolean
-  region: HttpTypes.StoreRegion
+  region: Region
 }) {
-  const [pricedProduct] = await getProductsById({
-    ids: [product.id!],
+  const pricedProduct = await retrievePricedProductById({
+    id: productPreview.id,
     regionId: region.id,
-  })
+  }).then((product) => product)
 
   if (!pricedProduct) {
     return null
@@ -27,21 +29,23 @@ export default async function ProductPreview({
 
   const { cheapestPrice } = getProductPrice({
     product: pricedProduct,
+    region,
   })
 
   return (
-    <LocalizedClientLink href={`/products/${product.handle}`} className="group">
-      <div data-testid="product-wrapper">
+    <LocalizedClientLink
+      href={`/products/${productPreview.handle}`}
+      className="group"
+    >
+      <div  data-testid="product-wrapper">
         <Thumbnail
-          thumbnail={product.thumbnail}
-          images={product.images}
+          thumbnail={productPreview.thumbnail}
           size="full"
           isFeatured={isFeatured}
+          className="max-h-[500px]"
         />
         <div className="flex txt-compact-medium mt-4 justify-between">
-          <Text className="text-ui-fg-subtle" data-testid="product-title">
-            {product.title}
-          </Text>
+          <Text className="text-slate-700" data-testid="product-title">{productPreview.title}</Text>
           <div className="flex items-center gap-x-2">
             {cheapestPrice && <PreviewPrice price={cheapestPrice} />}
           </div>

@@ -1,5 +1,5 @@
-import { getProductsById } from "@lib/data/products"
-import { HttpTypes } from "@medusajs/types"
+import { retrievePricedProductById } from "@lib/data"
+import { Region } from "@medusajs/medusa"
 import ProductActions from "@modules/products/components/product-actions"
 
 /**
@@ -10,12 +10,9 @@ export default async function ProductActionsWrapper({
   region,
 }: {
   id: string
-  region: HttpTypes.StoreRegion
+  region: Region
 }) {
-  const [product] = await getProductsById({
-    ids: [id],
-    regionId: region.id,
-  })
+  const product = await retrievePricedProductById({ id, regionId: region.id })
 
   if (!product) {
     return null

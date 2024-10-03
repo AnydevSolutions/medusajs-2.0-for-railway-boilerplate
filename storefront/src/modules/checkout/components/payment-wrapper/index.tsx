@@ -1,15 +1,14 @@
 "use client"
 
+import { Cart, PaymentSession } from "@medusajs/medusa"
 import { loadStripe } from "@stripe/stripe-js"
 import React from "react"
 import StripeWrapper from "./stripe-wrapper"
 import { PayPalScriptProvider } from "@paypal/react-paypal-js"
 import { createContext } from "react"
-import { HttpTypes } from "@medusajs/types"
-import { isPaypal, isStripe } from "@lib/constants"
 
 type WrapperProps = {
-  cart: HttpTypes.StoreCart
+  cart: Omit<Cart, "refundable_amount" | "refunded_total">
   children: React.ReactNode
 }
 
@@ -21,15 +20,11 @@ const stripePromise = stripeKey ? loadStripe(stripeKey) : null
 const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID
 
 const Wrapper: React.FC<WrapperProps> = ({ cart, children }) => {
-  const paymentSession = cart.payment_collection?.payment_sessions?.find(
-    (s) => s.status === "pending"
-  )
+  const paymentSession = cart.payment_session as PaymentSession
 
-  if (
-    isStripe(paymentSession?.provider_id) &&
-    paymentSession &&
-    stripePromise
-  ) {
+  const isStripe = paymentSession?.provider_id?.includes("stripe")
+
+  if (isStripe && paymentSession && stripePromise) {
     return (
       <StripeContext.Provider value={true}>
         <StripeWrapper
@@ -44,7 +39,7 @@ const Wrapper: React.FC<WrapperProps> = ({ cart, children }) => {
   }
 
   if (
-    isPaypal(paymentSession?.provider_id) &&
+    paymentSession?.provider_id === "paypal" &&
     paypalClientId !== undefined &&
     cart
   ) {
@@ -52,7 +47,7 @@ const Wrapper: React.FC<WrapperProps> = ({ cart, children }) => {
       <PayPalScriptProvider
         options={{
           "client-id": process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "test",
-          currency: cart?.currency_code.toUpperCase(),
+          currency: cart?.region.currency_code.toUpperCase(),
           intent: "authorize",
           components: "buttons",
         }}

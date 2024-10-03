@@ -1,57 +1,66 @@
-import { HttpTypes } from "@medusajs/types"
+import { Order } from "@medusajs/medusa"
 import { Text } from "@medusajs/ui"
 
 type OrderDetailsProps = {
-  order: HttpTypes.StoreOrder
+  order: Order
   showStatus?: boolean
 }
 
 const OrderDetails = ({ order, showStatus }: OrderDetailsProps) => {
-  const formatStatus = (str: string) => {
-    const formatted = str.split("_").join(" ")
+  // Mapea el estatus al español
+  const translateStatus = (status: string) => {
+    const statusMap: { [key: string]: string } = {
+      "pending": "Pendiente",
+      "completed": "Completado",
+      "shipped": "Enviado",
+      "canceled": "Cancelado",
+      "partially_shipped": "Parcialmente enviado",
+      "requires_action": "Requiere acción",
+      "not_fulfilled": "No cumplido",
+      "fulfilled": "Cumplido",
+      "partially_fulfilled": "Parcialmente cumplido",
+      "refunded": "Reembolsado",
+      "partially_refunded": "Parcialmente reembolsado",
+      "paid": "Pagado",
+      "awaiting_payment": "En espera de pago",
+      "unpaid": "No pagado",
+      "processing": "Procesando",
+      "captured":"Capturado"
+      // Agrega más estados si es necesario
+    }
 
-    return formatted.slice(0, 1).toUpperCase() + formatted.slice(1)
+    return statusMap[status] || status
   }
 
   return (
     <div>
       <Text>
-        We have sent the order confirmation details to{" "}
-        <span
-          className="text-ui-fg-medium-plus font-semibold"
-          data-testid="order-email"
-        >
+        Hemos enviado los datos de confirmación del pedido a{" "}
+        <span className="text-ui-fg-medium-plus font-semibold" data-testid="order-email">
           {order.email}
         </span>
         .
       </Text>
       <Text className="mt-2">
-        Order date:{" "}
-        <span data-testid="order-date">
-          {new Date(order.created_at).toDateString()}
-        </span>
+        Fecha de la orden: <span data-testid="order-date" className="capitalize">{new Date(order.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
       </Text>
       <Text className="mt-2 text-ui-fg-interactive">
-        Order number: <span data-testid="order-id">{order.display_id}</span>
+        Numero de orden: <span data-testid="order-id">{order.display_id}</span>
       </Text>
 
       <div className="flex items-center text-compact-small gap-x-4 mt-4">
         {showStatus && (
           <>
             <Text>
-              Order status:{" "}
-              <span className="text-ui-fg-subtle " data-testid="order-status">
-                {/* TODO: Check where the statuses should come from */}
-                {/* {formatStatus(order.fulfillment_status)} */}
+              Estatus de la orden:{" "}
+              <span className="text-ui-fg-subtle" data-testid="order-status">
+                {translateStatus(order.fulfillment_status)}
               </span>
             </Text>
             <Text>
-              Payment status:{" "}
-              <span
-                className="text-ui-fg-subtle "
-                sata-testid="order-payment-status"
-              >
-                {/* {formatStatus(order.payment_status)} */}
+              Estatus del pago:{" "}
+              <span className="text-ui-fg-subtle" data-testid="order-payment-status">
+                {translateStatus(order.payment_status)}
               </span>
             </Text>
           </>

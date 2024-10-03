@@ -1,5 +1,4 @@
-import repeat from "@lib/util/repeat"
-import { HttpTypes } from "@medusajs/types"
+import { LineItem, Region } from "@medusajs/medusa"
 import { Table } from "@medusajs/ui"
 
 import Divider from "@modules/common/components/divider"
@@ -7,24 +6,25 @@ import Item from "@modules/order/components/item"
 import SkeletonLineItem from "@modules/skeletons/components/skeleton-line-item"
 
 type ItemsProps = {
-  items: HttpTypes.StoreCartLineItem[] | HttpTypes.StoreOrderLineItem[] | null
+  items: LineItem[]
+  region: Region
 }
 
-const Items = ({ items }: ItemsProps) => {
+const Items = ({ items, region }: ItemsProps) => {
   return (
     <div className="flex flex-col">
       <Divider className="!mb-0" />
       <Table>
         <Table.Body data-testid="products-table">
-          {items?.length
+          {items?.length && region
             ? items
                 .sort((a, b) => {
-                  return (a.created_at ?? "") > (b.created_at ?? "") ? -1 : 1
+                  return a.created_at > b.created_at ? -1 : 1
                 })
                 .map((item) => {
-                  return <Item key={item.id} item={item} />
+                  return <Item key={item.id} item={item} region={region} />
                 })
-            : repeat(5).map((i) => {
+            : Array.from(Array(5).keys()).map((i) => {
                 return <SkeletonLineItem key={i} />
               })}
         </Table.Body>

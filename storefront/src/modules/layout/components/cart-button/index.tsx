@@ -1,17 +1,15 @@
-import { notFound } from "next/navigation"
+import { LineItem } from "@medusajs/medusa"
+
+import { enrichLineItems, retrieveCart } from "@modules/cart/actions"
+
 import CartDropdown from "../cart-dropdown"
-import { enrichLineItems, retrieveCart } from "@lib/data/cart"
 
 const fetchCart = async () => {
   const cart = await retrieveCart()
 
-  if (!cart) {
-    return null
-  }
-
-  if (cart?.items?.length) {
-    const enrichedItems = await enrichLineItems(cart.items, cart.region_id!)
-    cart.items = enrichedItems
+  if (cart?.items.length) {
+    const enrichedItems = await enrichLineItems(cart?.items, cart?.region_id)
+    cart.items = enrichedItems as LineItem[]
   }
 
   return cart

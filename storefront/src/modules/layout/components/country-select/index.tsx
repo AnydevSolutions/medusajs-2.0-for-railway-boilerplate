@@ -1,13 +1,13 @@
 "use client"
 
 import { Listbox, Transition } from "@headlessui/react"
+import { Region } from "@medusajs/medusa"
 import { Fragment, useEffect, useMemo, useState } from "react"
 import ReactCountryFlag from "react-country-flag"
 
 import { StateType } from "@lib/hooks/use-toggle-state"
+import { updateRegion } from "app/actions"
 import { useParams, usePathname } from "next/navigation"
-import { updateRegion } from "@lib/data/cart"
-import { HttpTypes } from "@medusajs/types"
 
 type CountryOption = {
   country: string
@@ -17,36 +17,33 @@ type CountryOption = {
 
 type CountrySelectProps = {
   toggleState: StateType
-  regions: HttpTypes.StoreRegion[]
+  regions: Region[]
 }
 
 const CountrySelect = ({ toggleState, regions }: CountrySelectProps) => {
-  const [current, setCurrent] = useState<
-    | { country: string | undefined; region: string; label: string | undefined }
-    | undefined
-  >(undefined)
+  const [current, setCurrent] = useState<CountryOption | undefined>(undefined)
 
   const { countryCode } = useParams()
   const currentPath = usePathname().split(`/${countryCode}`)[1]
 
   const { state, close } = toggleState
 
-  const options = useMemo(() => {
+  const options: CountryOption[] | undefined = useMemo(() => {
     return regions
       ?.map((r) => {
-        return r.countries?.map((c) => ({
+        return r.countries.map((c) => ({
           country: c.iso_2,
           region: r.id,
           label: c.display_name,
         }))
       })
       .flat()
-      .sort((a, b) => (a?.label ?? "").localeCompare(b?.label ?? ""))
+      .sort((a, b) => a.label.localeCompare(b.label))
   }, [regions])
 
   useEffect(() => {
     if (countryCode) {
-      const option = options?.find((o) => o?.country === countryCode)
+      const option = options?.find((o) => o.country === countryCode)
       setCurrent(option)
     }
   }, [options, countryCode])
@@ -63,13 +60,13 @@ const CountrySelect = ({ toggleState, regions }: CountrySelectProps) => {
         onChange={handleChange}
         defaultValue={
           countryCode
-            ? options?.find((o) => o?.country === countryCode)
+            ? options?.find((o) => o.country === countryCode)
             : undefined
         }
       >
         <Listbox.Button className="py-1 w-full">
           <div className="txt-compact-small flex items-start gap-x-2">
-            <span>Shipping to:</span>
+            <span>Envío a:</span>
             {current && (
               <span className="txt-compact-small flex items-center gap-x-2">
                 <ReactCountryFlag
@@ -78,7 +75,7 @@ const CountrySelect = ({ toggleState, regions }: CountrySelectProps) => {
                     width: "16px",
                     height: "16px",
                   }}
-                  countryCode={current.country ?? ""}
+                  countryCode={current.country}
                 />
                 {current.label}
               </span>
@@ -110,9 +107,9 @@ const CountrySelect = ({ toggleState, regions }: CountrySelectProps) => {
                         width: "16px",
                         height: "16px",
                       }}
-                      countryCode={o?.country ?? ""}
+                      countryCode={o.country}
                     />{" "}
-                    {o?.label}
+                    {o.label}
                   </Listbox.Option>
                 )
               })}
